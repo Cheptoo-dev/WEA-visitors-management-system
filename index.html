@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitor Management System</title>
+
+  <!-- Bootstrap CSS for better styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .form-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .table-container {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 form-container">
+        <h3 class="text-center mb-4">Visitor Registration</h3>
+        <form id="visitorForm">
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="visitDate" class="form-label">Visit Date</label>
+            <input type="date" class="form-control" id="visitDate" required>
+          </div>
+          <div class="mb-3">
+            <label for="purpose" class="form-label">Purpose of Visit</label>
+            <input type="text" class="form-control" id="purpose" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add Visitor</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="row table-container">
+      <div class="col-md-12">
+        <h3 class="text-center mb-4">Visitor List</h3>
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Visit Date</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody id="visitorTableBody">
+            <!-- Dynamic visitor rows will go here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const visitorForm = document.getElementById('visitorForm');
+      const visitorTableBody = document.getElementById('visitorTableBody');
+
+      // Function to fetch and display the visitors
+      function fetchVisitors() {
+        fetch('/api/visitors')
+          .then(response => response.json())
+          .then(data => {
+            visitorTableBody.innerHTML = '';
+            data.forEach(visitor => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${visitor.name}</td>
+                <td>${visitor.email}</td>
+                <td>${visitor.visitDate}</td>
+                <td>${visitor.purpose}</td>
+              `;
+              visitorTableBody.appendChild(row);
+            });
+          });
+      }
+
+      // Fetch the visitors on page load
+      fetchVisitors();
+
+      // Handle form submission
+      visitorForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const visitDate = document.getElementById('visitDate').value;
+        const purpose = document.getElementById('purpose').value;
+
+        const newVisitor = { name, email, visitDate, purpose };
+
+        // Post the new visitor to the server
+        fetch('/api/visitors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newVisitor),
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Clear the form
+          visitorForm.reset();
+
+          // Fetch and refresh the visitors list
+          fetchVisitors();
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
+
